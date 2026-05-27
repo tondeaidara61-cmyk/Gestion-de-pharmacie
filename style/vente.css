@@ -1,0 +1,55 @@
+section {
+     margin-top: 180px;
+
+}
+
+
+.card-content {
+     background-color: #e6e6e6;
+     border-radius: 15px;
+}
+
+.img {
+     width: 100%;
+     height: 180px;
+     object-fit: contain;
+
+     background: linear-gradient(135deg, #f5f7fa, #e8ecf0);
+     border-radius: 15px;
+     padding: 10px;
+
+}
+
+.card-content .nom {
+     font-size: 22px;
+     font-weight: 700;
+     color: #2e2e7c;
+     display: flex;
+     justify-content: space-between;
+     padding-top: 10px;
+
+}
+
+.card-content a {
+     text-decoration: none;
+     padding: 1px 8px;
+     color: #ffffff;
+     font-weight: 500;
+     font-size: 18px;
+     background-color: #2e2e7c;
+     border-radius: 15px;
+     justify-content: center;
+
+}
+
+.card-content p {
+     font-size: 20px;
+     font-weight: 600;
+     padding-bottom: 10px;
+}
+
+.prix em {
+     font-size: 22px;
+     font-weight: 700;
+     color: #3e3e9b;
+}

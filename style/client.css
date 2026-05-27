@@ -1,0 +1,67 @@
+.bg-t-secondary {
+     background-color: #ebe9e8 !important;
+}
+
+section {
+     margin-top: 110px;
+}
+
+
+label {
+     font-size: 22px;
+     font-weight: 600;
+}
+
+
+
+.art1 {
+
+     background-image: url(../images/image1.png);
+     background-repeat: no-repeat;
+     background-position: center;
+     background-size: cover;
+}
+
+.art1 {
+     position: relative;
+}
+
+.art1::before {
+     content: '';
+     position: absolute;
+     inset: 0;
+     background-color: rgba(0, 0, 0, 0.4);
+     border-radius: inherit;
+}
+
+
+#succes {
+     font-size: 19px;
+     color: darkgreen;
+     background-color: rgba(7, 223, 7, 0.466);
+     text-align: center;
+}
+
+
+h1 {
+     color: #ffffff;
+}
+
+.art1 nav {
+     margin-top: 130px;
+     color: #000000;
+}
+
+.art1 p {
+     font-size: 30px;
+     font-weight: 600;
+}
+
+.art1 h2 {
+     font-size: 80px;
+     font-weight: 700;
+}
+
+#btn {
+     font-size: 25px;
+}
