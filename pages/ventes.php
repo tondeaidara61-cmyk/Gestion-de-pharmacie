@@ -5,8 +5,8 @@ include_once __DIR__ . '../../includes/fonctions.php';
 
 $fonctionnalite = ($_GET['fonct'] ?? 'Vente');
 
-if (!isset($_SESSION['ids_'])) {
-     $_SESSION['ids_'] = [];
+if (!isset($_SESSION['ids_panier'])) {
+     $_SESSION['ids_panier'] = [];
 }
 
 
@@ -14,8 +14,8 @@ $id = (int) ($_GET['id'] ?? 0);
 
 
 if ($id > 0) {
-     if (!in_array($id, $_SESSION['ids_'])) {
-          $_SESSION['ids_'][] = $id;
+     if (!in_array($id, $_SESSION['ids_panier'])) {
+          $_SESSION['ids_panier'][] = $id;
      }
 }
 
@@ -23,7 +23,7 @@ if ($id > 0) {
 
 if ($fonctionnalite == 'Panier') {
 
-     $ids = $_SESSION['ids_'];
+     $ids = $_SESSION['ids_panier'];
 }
 
 $medicaments = Afficher($database, 'medicaments');
