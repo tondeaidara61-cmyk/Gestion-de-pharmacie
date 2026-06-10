@@ -64,3 +64,9 @@ function Affiche_cibler($database, $table, $colonne, $indice)
      $data->execute();
      return $data->fetch(PDO::FETCH_ASSOC);
 }
+
+function modifie_donnee($database, $table, $colonne, $valeur, $index, $indice)
+{
+     $data = $database->query("update $table set $colonne = $valeur where $index=$indice");
+     $data->execute();
+}
