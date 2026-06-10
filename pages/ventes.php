@@ -24,6 +24,25 @@ if ($id > 0) {
 if ($fonctionnalite == 'Panier') {
 
      $ids = $_SESSION['ids_panier'];
+
+     if (isset($_POST['valider'])) {
+          $quantites = $_POST['quantite'];
+
+          foreach ($ids as $key => $value_id) {
+               $qte = (int) $quantites[$key];
+
+               $verification_qte = Affiche_cibler($database, 'medicaments', 'id_medoc', $value_id);
+               $qte_stock = $verification_qte['quantite_stock'];
+
+               if (isset($_SESSION['qte_insuffisant_id'])) {
+                    $_SESSION['qte_insuffisant_id'] = [];
+               }
+
+               if ($qte > $qte_stock) {
+                    $_SESSION['qte_insuffisant_id'] = $value_id;
+               }
+          }
+     }
 }
 
 $medicaments = Afficher($database, 'medicaments');
@@ -108,45 +127,65 @@ $medicaments = Afficher($database, 'medicaments');
      <?php endif; ?>
 
      <?php if ($fonctionnalite == 'Panier'): ?>
+          <form action="" method="post">
+               <section class="container">
+                    <h1>
+                         Panier <em class="compteur"><?= count($ids) ?></em>
+                    </h1>
 
-          <section class="container">
-               <h1>
-                    Panier
-               </h1>
+                    <?php if (count($ids) != 0): ?>
+                         <?php foreach ($ids as $id): ?>
+                              <?php
+                              $medoc_choisi = Affiche_cibler($database, 'medicaments', 'id_medoc', $id);
+                              ?>
 
-               <?php if (count($ids) != 0): ?>
-                    <?php foreach ($ids as $id): ?>
-                         <?php
-                         $medoc_choisi = Affiche_cibler($database, 'medicaments', 'id_medoc', $id);
-                         ?>
-                         <div class="col-10">
+                              <div class="col-10" id="contenu-panier">
 
-                              <img src="../images/image2.png" class="img" alt="">
-                              <nav>
-                                   <p class="nom">
-                                        <?= $medoc_choisi['nom'] ?>
-                                   </p>
-                                   <p class="prix">
-                                        Prix: <em><?= $medoc_choisi['prix'] ?> FCFA</em>
-                                   </p>
-                                   <p>
-                                        Stock: <em><?= $medoc_choisi['quantite_stock'] ?></em>
-                                   </p>
-                                   <p>
-                                        Quantité: <input type="number" min="1" value="1" name="quantite" class="from-control">
-                                   </p>
-                                   <p>
-                                        <button type="button" class="btn btn-danger">
-                                             Supprimer
-                                        </button>
-                                   </p>
-                              </nav>
+                                   <img src="../images/image2.png" class="img-panier" alt="">
+                                   <nav>
+                                        <p class="nom">
+                                             <?= $medoc_choisi['nom'] ?>
+                                        </p>
+                                        <p class="prix">
+                                             Prix: <em><?= $medoc_choisi['prix'] ?> FCFA</em>
+                                        </p>
+                                        <p>
+                                             Stock: <em><?= $medoc_choisi['quantite_stock'] ?></em>
+                                        </p>
+                                        <p>
+                                             <label for=""> Quantité:</label>
+                                             <input type="number" min="1" value="1" name="quantite[]" class="from-control ">
+                                        </p>
+                                        <p>
+                                             <button type="button" class="btn btn-outline-danger">
+                                                  Supprimer
+                                             </button>
+                                        </p>
+                                   </nav>
 
-                         </div>
-                    <?php endforeach; ?>
+                              </div>
+                         <?php endforeach; ?>
+                    <?php endif; ?>
+               </section>
+               <div class="container">
+                    <?php if (count($ids) != 0): ?>
+                         <button type="button" name="annuler" class="form-control btn  btn-outline-danger my-4">
+                              Annuler
+                         </button>
+                         <button type="submit" name="valider" class="form-control btn  btn-outline-primary mb-5">
+                              Valider
+                         </button>
+                    <?php endif; ?>
+               </div>
+               <?php if (count($ids) == 0): ?>
+                    <p>
+                         Panier vide......
+                    </p>
+                    <button type="button" class="btn btn-danger my-5" onclick="window.location='ventes.php?fonct=Vente'">
+                         Retour
+                    </button>
                <?php endif; ?>
-          </section>
-
+          </form>
      <?php endif; ?>
 </body>
 
