@@ -2,44 +2,90 @@
 session_start();
 include_once __DIR__ . '../../config/database.php';
 include_once __DIR__ . '../../includes/fonctions.php';
+$qte_insuffisant = false;
+$qte_insuffisant_ids = '';
 
 $fonctionnalite = ($_GET['fonct'] ?? 'Vente');
 
-if (!isset($_SESSION['ids_panier'])) {
-     $_SESSION['ids_panier'] = [];
-}
+if ($fonctionnalite == 'Vente') {
+
+     if (!isset($_SESSION['ids_panier'])) {
+          // unset($_SESSION['ids_panier']);
+          $_SESSION['ids_panier'] = [];
+     }
+     $input = json_decode(file_get_contents("php://input"), true);
+     if (!empty($input)) {
+          $id = $input["id"];
 
 
-$id = (int) ($_GET['id'] ?? 0);
-
-
-if ($id > 0) {
-     if (!in_array($id, $_SESSION['ids_panier'])) {
-          $_SESSION['ids_panier'][] = $id;
+          if ($id > 0) {
+               if (!in_array($id, $_SESSION['ids_panier'])) {
+                    $_SESSION['ids_panier'][] = $id;
+               }
+          }
      }
 }
-
 
 
 if ($fonctionnalite == 'Panier') {
 
      $ids = $_SESSION['ids_panier'];
+     $input_supprimer = json_decode(file_get_contents("php://input"), true);
+     if (!empty($input_supprimer)) {
+          $id_supprimer = $input_supprimer['id'];
+          if (in_array($id_supprimer, $_SESSION['ids_panier'])) {
+               $ids_panier = $_SESSION['ids_panier'];
+               unset($_SESSION['ids_panier']);
+               $_SESSION['ids_panier'] = [];
 
+               foreach ($ids_panier as $id_panier) {
+                    if ($id_panier != $id_supprimer) {
+                         $_SESSION['ids_panier'][] = $id_panier;
+                    }
+               }
+          }
+
+          echo json_encode(["status" => "ok"]);
+          exit();
+     }
+
+     // Gestion d'erreur de stock insuffisant.
+     if (isset($_SESSION['qte_insuffisant_id'])) {
+          $qte_insuffisant_ids = $_SESSION['qte_insuffisant_id'];
+          $qte_insuffisant = true;
+          unset($_SESSION['qte_insuffisant_id']);
+     }
+
+     // validation de la vente.
      if (isset($_POST['valider'])) {
           $quantites = $_POST['quantite'];
 
+          // vérification des stock.
           foreach ($ids as $key => $value_id) {
                $qte = (int) $quantites[$key];
 
                $verification_qte = Affiche_cibler($database, 'medicaments', 'id_medoc', $value_id);
                $qte_stock = $verification_qte['quantite_stock'];
 
-               if (isset($_SESSION['qte_insuffisant_id'])) {
+               if (!isset($_SESSION['qte_insuffisant_id'])) {
                     $_SESSION['qte_insuffisant_id'] = [];
                }
 
-               if ($qte > $qte_stock) {
-                    $_SESSION['qte_insuffisant_id'] = $value_id;
+               if ($qte_stock < $qte) {
+                    $_SESSION['qte_insuffisant_id'][] = $value_id;
+               }
+          }
+
+          if (count($_SESSION['qte_insuffisant_id']) == 0) {
+               foreach ($ids as $key => $value_id) {
+                    $qte = (int) $quantites[$key];
+                    $verification_qte = Affiche_cibler($database, 'medicaments', 'id_medoc', $value_id);
+
+                    // calcule du stock restant
+                    $qte_stock = $verification_qte['quantite_stock'];
+                    $qte_restant = $qte_stock - $qte;
+                    // Reinitialisation du stock
+                    modifie_donnee($database, 'medicaments', 'quantite_stock', $qte_restant, 'id_medoc', $value_id);
                }
           }
      }
@@ -62,7 +108,8 @@ $medicaments = Afficher($database, 'medicaments');
 
 <body>
      <header>
-          <?php include_once '../includes/header.php'; ?>
+          <?= include_once '../includes/header.php'; ?>
+
      </header>
 
      <?php if ($fonctionnalite == 'Vente'): ?>
@@ -86,7 +133,9 @@ $medicaments = Afficher($database, 'medicaments');
                                              <img src="../images/image2.png" class="img" alt="">
                                              <p class="nom">
                                                   <?= $medoc['nom'] ?>
-                                                  <a href="?id=<?= $medoc['id_medoc'] ?>">+ panier</a>
+                                                  <button type="button" onclick="AjoutePanier(<?= $medoc['id_medoc'] ?>)" class="ajoutepanier">
+                                                       + Panier
+                                                  </button>
                                              </p>
                                              <p class="prix">
                                                   Prix: <em><?= $medoc['prix'] ?> FCFA</em>
@@ -111,7 +160,9 @@ $medicaments = Afficher($database, 'medicaments');
                                              <img src="../images/image2.png" class="img" alt="">
                                              <p class="nom ">
                                                   <?= $medoc['nom'] ?>
-                                                  <a href="?id=<?= $medoc['id_medoc'] ?>">+ panier</a>
+                                                  <button type="button" onclick="AjoutePanier(<?= $medoc['id_medoc'] ?>)" class="ajoutepanier">
+                                                       + Panier
+                                                  </button>
                                              </p>
                                              <p class="prix">
                                                   Prix: <em> <?= $medoc['prix'] ?> FCFA </em>
@@ -139,7 +190,7 @@ $medicaments = Afficher($database, 'medicaments');
                               $medoc_choisi = Affiche_cibler($database, 'medicaments', 'id_medoc', $id);
                               ?>
 
-                              <div class="col-10" id="contenu-panier">
+                              <div class="col-10 contenu-panier" id="produit<?= $medoc_choisi['id_medoc'] ?>">
 
                                    <img src="../images/image2.png" class="img-panier" alt="">
                                    <nav>
@@ -156,8 +207,17 @@ $medicaments = Afficher($database, 'medicaments');
                                              <label for=""> Quantité:</label>
                                              <input type="number" min="1" value="1" name="quantite[]" class="from-control ">
                                         </p>
+                                        <?php if ($qte_insuffisant == true): ?>
+                                             <?php foreach ($qte_insuffisant_ids as $id_qte): ?>
+                                                  <?php if ($id_qte == $medoc_choisi['id_medoc']): ?>
+                                                       <p class="erreur">
+                                                            Stock insuffisant !
+                                                       </p>
+                                                  <?php endif; ?>
+                                             <?php endforeach; ?>
+                                        <?php endif; ?>
                                         <p>
-                                             <button type="button" class="btn btn-outline-danger">
+                                             <button type="button" class="btn btn-outline-danger" onclick="Supprimer(<?= $medoc_choisi['id_medoc'] ?>)">
                                                   Supprimer
                                              </button>
                                         </p>
@@ -188,5 +248,7 @@ $medicaments = Afficher($database, 'medicaments');
           </form>
      <?php endif; ?>
 </body>
+<script src="../includes/fonctions.js"> </script>
+
 
 </html>
