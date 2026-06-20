@@ -51,7 +51,7 @@ section {
 
 }
 
-.card-content a {
+.ajoutepanier {
      text-decoration: none;
      padding: 1px 8px;
      color: #ffffff;
@@ -60,6 +60,7 @@ section {
      background-color: #2e2e7c;
      border-radius: 15px;
      justify-content: center;
+     border: 0px;
 
 }
 
@@ -79,14 +80,14 @@ button {
      font-size: 20px;
 }
 
-#contenu-panier {
+.contenu-panier {
      display: flex;
      border: 2px solid black;
      margin: 35px 0 15px 90px;
      padding: 10px;
 }
 
-#contenu-panier nav {
+.contenu-panier nav {
      margin: 10px 0 0 15px;
      font-size: 22px;
 }
@@ -97,4 +98,9 @@ button {
      color: rgb(255, 255, 255);
      border-radius: 50px;
      font-size: 22px;
+}
+
+.erreur {
+     font-size: 18px;
+     color: red;
 }
