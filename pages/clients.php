@@ -17,10 +17,17 @@ if (isset($_POST['envoyer'])) {
      $prenom = htmlspecialchars($_POST['prenom']);
      $telephone = htmlspecialchars($_POST['telephone']);
      $type_cl = 'occasionnel';
+     $identifiant = null;
 
      if (!empty($nom) && !empty($prenom) && !empty($telephone)) {
 
-          ajout_client($database, 'client', $nom, $prenom, $telephone, $type_cl);
+          $tab_tel = str_split($telephone);
+
+          $identifiant = $tab_tel[2] . $tab_tel[3] . $tab_tel[4]
+               . strtoupper($nom[0]) . strtoupper($prenom[0])
+               . date('H') . date('s');
+
+          ajout_client($database, 'client', $nom, $prenom, $telephone, $type_cl, $identifiant);
 
           $_SESSION['succes'] = true;
           header('location: clients.php?fonct=Ajouter');

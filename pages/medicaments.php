@@ -83,7 +83,7 @@ if (isset($_POST['envoyer'])) {
                          </p>
                          <p class="mb3 my-4">
                               <label for="" class="form-label">Prix Unitaire</label>
-                              <input type="number" min="0" required placeholder="--- Entrer le prix ---" name="prix" class="form-control ">
+                              <input type="number" min="0" required placeholder="--- Entrer le prix ---" name="prix" class="form-control " step="any">
                          </p>
                          <p class="mb3 my-4">
                               <label for="" class="form-label">Quantité</label>
